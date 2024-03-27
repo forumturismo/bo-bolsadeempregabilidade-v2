@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit WpUser{% endblock %}
+
+{% block body %}
+    <h1>Edit WpUser</h1>
+
+    {{ include('wp_user/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_wp_user_index') }}">back to list</a>
+
+    {{ include('wp_user/_delete_form.html.twig') }}
+{% endblock %}
