@@ -13,6 +13,9 @@ class WpUserSearchType extends AbstractType
     /**
      * {@inheritdoc}
      */
+    
+    
+    
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         
