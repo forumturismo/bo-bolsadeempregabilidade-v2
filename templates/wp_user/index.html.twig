@@ -4,96 +4,134 @@
 
 {% block title %}Lista de Candidatos{% endblock %}
 
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    {#<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css" rel="stylesheet" >#}
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {#    <script src="https://code.jquery.com/jquery-3.7.1.js" ></script>
+        <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js" ></script>
+        <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.js" ></script>#}
+
+
+{% endblock %}
+
+
+
+
+
+
+
 {% block body %}
-    
-    
+
+
     <div class="container  bg-light">
-    <h3>Filtro de Pesquisa de Candidatos</h3>
-    
-        <form class="row g-3 ">
-            <div class="row g-3">
-                <div class="col-sm-9">
-                    <input type="text" class="form-control" placeholder="" aria-label="">
-                </div>
-            </div>
+        <h3>Filtro de Pesquisa de Candidatos</h3>
 
-            <div class="row g-3">
-                <div class="col-sm-3">
-                    <input type="text" class="form-control" placeholder="Data de Inicio" aria-label="Data de Inicio">
-                </div>
-                <div class="col-sm-3">
-                    <input type="text" class="form-control" placeholder="Data de Fim" aria-label="Data de Inicio">
-                </div>
-                <div class="col-sm-3">
-                    <input type="text" class="form-control" placeholder="País" aria-label="País">
-                </div>
-                <div class="col-sm-3">
-                    <input type="submit" class="btn btn-primary" value="Pesquisar">
-                    <input type="reset" class="btn btn-secondary" value="Limpar">
-                </div>
-            </div>
-            
-        </form>
+        
+        {{ form_start(search_form)}}
+           <form class="row g-3 ">
+                    <div class="row g-3">
+                        <div class="col-sm-9">
+                            {#<input type="text" class="form-control" placeholder="" aria-label="">#}
+                            {{ form_row(search_form.todos) }}
+                        </div>
+                    </div>
+        
+                    <div class="row g-3">
+                        <div class="col-sm-3">
+                            {#<input type="text" class="form-control" placeholder="Data de Inicio" aria-label="Data de Inicio">#}
+                            {{ form_row(search_form.data_inicio) }}
+                        </div>
+                        <div class="col-sm-3">
+                            {#<input type="text" class="form-control" placeholder="Data de Fim" aria-label="Data de Inicio">#}
+                            {{ form_row(search_form.data_fim) }}
+                        </div>
+                        <div class="col-sm-3">
+                            {#<input type="text" class="form-control" placeholder="País" aria-label="País">#}
+                             {{ form_row(search_form.pais) }}
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="submit" class="btn btn-primary" value="Pesquisar">
+                            <a class="btn btn-primary" href="/assets/bolsa_empregabilidade_users.xlsx" role="button">Exportar</a>
+                            <input type="reset" class="btn btn-secondary" value="Limpar">
+                        </div>
+                    </div>
+        
+                {{ form_end(search_form) }}
 
-{#   {{ form(search_form) }}#}
-  
+        {#{{ form(search_form) }}#}
 
-    <br>
-   
+
+        <br>
+
     </div> 
 
 
-  
 
-<div class="container">
-     <hr/>
-    <h1>Lista de Candidatos</h1>
 
-    <div class="row">
-        <div class="col">
-            <div class="count">
-                <h4>Total de candidatos encontrados: ????</h4>
+    <div class="container">
+        <hr/>
+        <h1>Lista de Candidatos</h1>
+
+        <div class="row">
+            <div class="col">
+                <div class="count">
+                    <h4>Total de candidatos encontrados: <div class="count">
+                            {{ pagination.getTotalItemCount }}
+                        </div></h4>
+                </div>
+                <table id="tabela_candidatos" class="table table-striped table-responsive table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Data Registo</th>
+                            <th>User Login</th>
+                                {#                            <th>Primeiro Nome</th>#}
+                            <th>Nome</th>
+                            <th>Nº Curriculos</th>
+                            <th>Ult. Curri.</th>
+                            <th>Nacionalidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wp_user in pagination %}
+                            <tr>
+                                <td>{{ wp_user.id }}</td>
+                                <td>{{ wp_user.user_registered? wp_user.user_registered|date('Y-m-d H:i:s') : '' }}</td>
+                                <td>{{ wp_user.user_login }}</td>
+                                <td>{{ wp_user.name }}</td>
+                                {#                                <td>{{ wp_user.last_name }}</td>#}
+                                <td>{{ wp_user.user_resumes_count }}</td>
+                                <td>{{ wp_user.resume_updated? wp_user.resume_updated|date('Y-m-d H:i:s') : '' }}</td>
+                                <td>{{ wp_user.nacionalidade }}</td>
+
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6">no records found</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {# display navigation #}
+                <div class="navigation">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
             </div>
-            <table class="table table-striped table-responsive table-bordered">
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Data Registo</th>
-                        <th>User Login</th>
-                        <th>Primeiro Nome</th>
-                        <th>Ultimo Nome</th>
-                        <th>Nº Curriculos</th>
-                        <th>Ult. Curri.</th>
-                        <th>Nacionalidade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for wp_user in users %}
-                        <tr>
-                            <td>{{ wp_user.id }}</td>
-                            <td>{{ wp_user.user_registered? wp_user.user_registered|date('Y-m-d H:i:s') : '' }}</td>
-                            <td>{{ wp_user.user_login }}</td>
-                            <td>{{ wp_user.first_name }}</td>
-                            <td>{{ wp_user.last_name }}</td>
-                            <td>{{ wp_user.user_resumes_count }}</td>
-                            <td>{{ wp_user.resume_updated? wp_user.resume_updated|date('Y-m-d H:i:s') : '' }}</td>
-                            <td>{{ wp_user.nacionalidade }}</td>
-                            
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="6">no records found</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            {# display navigation #}
-{#            <div class="navigation">
-                {{ knp_pagination_render(pagination) }}
-            </div>#}
         </div>
     </div>
-             </div>
+
+
+    {#    <script>
+            new DataTable('#tabela_candidatos');
+        </script>#}
 
 {% endblock %}

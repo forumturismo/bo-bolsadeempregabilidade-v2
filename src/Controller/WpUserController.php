@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  * @Route("/wp/user")
@@ -21,11 +23,27 @@ class WpUserController extends AbstractController {
     public function index(\Doctrine\ORM\EntityManagerInterface $em, \Knp\Component\Pager\PaginatorInterface $paginator, Request $request) {
 
         $wpUserSearch = new \App\Entity\WpUserSearch();
-        $searchForm = $this->createForm('App\Form\WpUserSearchType', $wpUserSearch, ['method' => 'GET']);
+
+        $queryNacionalidades = "SELECT distinct(pm.meta_value) as nacionalidade 
+            FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id 
+                            where p.post_type = 'resume' and pm.meta_key = '_candidate_nacionalidade'";
+        $stmtNacionalidades = $em->getConnection()->prepare($queryNacionalidades);
+        $resultSetNacionalidades = $stmtNacionalidades->executeQuery();
+        $nacionalidades = $resultSetNacionalidades->fetchAllAssociative();
+
+        $new_nacionalidades["Todos"] = "";
+        
+        foreach ($nacionalidades as $key => $value) {
+            $new_nacionalidades[$value['nacionalidade']] = $value['nacionalidade'];
+        }
+
+
+
+        $searchForm = $this->createForm('App\Form\WpUserSearchType', $wpUserSearch, ['method' => 'GET', 'nacionalidades' => $new_nacionalidades]);
         $searchForm->handleRequest($request);
 
         $query = "SELECT wp_users.id as id, wp_users.user_registered as user_registered, wp_users.user_login as user_login, 
-                    user_meta.first_name as first_name, user_meta.last_name as last_name,
+                    candidate_names.name as name,
                     resumes.resumes_count as user_resumes_count, resumes_updated.resume_updated , nacionalidades.nacionalidade as nacionalidade
                 FROM wp_users 
                 JOIN (select t1.user_id,
@@ -40,35 +58,56 @@ class WpUserController extends AbstractController {
                 LEFT JOIN (SELECT distinct(p.post_author), pm.meta_value as nacionalidade FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id 
                             where p.post_type = 'resume' and pm.meta_key = '_candidate_nacionalidade') nacionalidades
                             on wp_users.id = nacionalidades.post_author
+                            
+
+                LEFT JOIN (SELECT distinct(p.post_author), pm.meta_value as name FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id 
+                            where p.post_type = 'resume' and pm.meta_key = '_candidate_name') candidate_names
+                            on wp_users.id = candidate_names.post_author
 
                 LEFT JOIN (SELECT max(p.post_modified) as resume_updated, p.post_author FROM wp_posts p where post_type = 'resume' group by p.post_author) resumes_updated                
-                        on wp_users.id = resumes_updated.post_author ";
+                        on wp_users.id = resumes_updated.post_author 
+                        
+                WHERE 1=1
+
+                ";
 
         if ($searchForm->isSubmitted() && $searchForm->isValid()) {
 
-            //$todos = $searchForm["todos"]->getData();
+            $todos = $searchForm["todos"]->getData();
             $dataInicio = $searchForm["data_inicio"]->getData();
             $dataFim = $searchForm["data_fim"]->getData();
             $pais = $searchForm["pais"]->getData();
 
+            if (!empty($todos)) {
+                $query = $query . " AND (wp_users.id = '" . $todos . "' "
+                        . "OR wp_users.user_login like '%" . $todos . "%' "
+                        . "OR candidate_names.name like '%" . $todos . "%' )";
+            }
             if (!empty($dataInicio)) {
-                $query = $query . " AND wp_users.user_registered >= " . $dataInicio;
+                $query = $query . " AND wp_users.user_registered >= '" . $dataInicio->format("Y-m-d") . "'";
             }
 
             if (!empty($dataFim)) {
-                $query = $query . " AND wp_users.user_registered <= " . $dataFim;
+                $query = $query . " AND wp_users.user_registered < '" . $dataFim->format("Y-m-d") . "'";
             }
-            
+
             if (!empty($pais)) {
-                $query = $query . " AND nacionalidade like '%" . $pais."%'";
+
+                foreach ($pais as $key => $value) {
+
+                    if ($key == 0):
+                        $query = $query . " AND (";
+                    else:
+                        $query = $query . " OR";
+                    endif;
+
+                    $query = $query . " nacionalidade like '%" . $value . "%'";
+                }
+                $query = $query . " )";
             }
-            
-            
         }
 
-
-
-        $query = $query . " ORDER BY resumes_updated.resume_updated desc LIMIT 50 OFFSET 0 ";
+        $query = $query . " ORDER BY resumes_updated.resume_updated desc";
 
         $stmt = $em->getConnection()->prepare($query);
 
@@ -76,14 +115,53 @@ class WpUserController extends AbstractController {
 
         $users = $resultSet->fetchAllAssociative();
 
-//dump($users);
+        $this->exportToExcel($users);
+
+        $pagination = $paginator->paginate(
+                $users, /* query NOT result */
+                $request->query->getInt('page', 1), /* page number */
+                50 /* limit per page */
+        );
+
+        $pagination->setParam('section', 'supplier');
+
+
         // parameters to template
-//        return $this->render('wp_user/index.html.twig', [   'search_form' => $searchForm->createView(), 'pagination' => $pagination]);
-        return $this->render('wp_user/index.html.twig', ['search_form' => $searchForm->createView(), 'users' => $users]);
-//
-//        return new Response(
-//                '<html><body>Hello</body></html>'
-//        );
+        return $this->render('wp_user/index.html.twig', ['search_form' => $searchForm->createView(), 'pagination' => $pagination]);
+
+    }
+
+    public function exportToExcel($users) {
+
+
+        $spreadsheet = new Spreadsheet();
+        $activeWorksheet = $spreadsheet->getActiveSheet();
+
+        $activeWorksheet->setCellValue('A1', 'Id');
+        $activeWorksheet->setCellValue('B1', 'Data Registo');
+        $activeWorksheet->setCellValue('C1', 'User Login');
+        $activeWorksheet->setCellValue('D1', 'Nome');
+        $activeWorksheet->setCellValue('E1', 'Nº Curriculos');
+        $activeWorksheet->setCellValue('F1', 'Ult. Curri.');
+        $activeWorksheet->setCellValue('G1', 'Nacionalidade');
+
+        $line = 2;
+        foreach ($users as $key => $user) {
+
+            $activeWorksheet->setCellValue('A' . $line, $user['id']);
+            $activeWorksheet->setCellValue('B' . $line, $user['user_registered']);
+            $activeWorksheet->setCellValue('C' . $line, $user['user_login']);
+            $activeWorksheet->setCellValue('D' . $line, $user['name']);
+            $activeWorksheet->setCellValue('E' . $line, $user['user_resumes_count']);
+            $activeWorksheet->setCellValue('F' . $line, $user['resume_updated']);
+            $activeWorksheet->setCellValue('G' . $line, $user['nacionalidade']);
+            $line = $line + 1;
+        }
+
+
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('assets/bolsa_empregabilidade_users.xlsx');
     }
 
     /**
