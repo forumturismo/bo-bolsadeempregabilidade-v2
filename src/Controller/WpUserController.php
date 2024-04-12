@@ -18,7 +18,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class WpUserController extends AbstractController {
 
     /**
-     * @Route("/", name="app_wp_user_index", methods={"GET"})
+     * @Route("/", name="app_wp_user_index", methods={"GET|POST"})
      */
     public function index(\Doctrine\ORM\EntityManagerInterface $em, \Knp\Component\Pager\PaginatorInterface $paginator, Request $request) {
 
