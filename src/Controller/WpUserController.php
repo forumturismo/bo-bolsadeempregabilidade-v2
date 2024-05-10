@@ -26,7 +26,7 @@ class WpUserController extends AbstractController {
 
         $queryNacionalidades = "SELECT distinct(pm.meta_value) as nacionalidade 
             FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id 
-                            where p.post_type = 'resume' and pm.meta_key = '_candidate_nacionalidade'";
+                            where p.post_type = 'resume' and pm.meta_key = '_candidate_nacionalidade' order by nacionalidade";
         $stmtNacionalidades = $em->getConnection()->prepare($queryNacionalidades);
         $resultSetNacionalidades = $stmtNacionalidades->executeQuery();
         $nacionalidades = $resultSetNacionalidades->fetchAllAssociative();
@@ -52,19 +52,19 @@ class WpUserController extends AbstractController {
                             from wp_usermeta t1 group by t1.user_id) user_meta 
                         on wp_users.id = user_meta.user_id
                 
-                LEFT JOIN (SELECT count(p.id) as resumes_count, p.post_author FROM wp_posts p where post_type = 'resume' group by p.post_author) resumes 
+                LEFT JOIN (SELECT count(p.id) as resumes_count, p.post_author FROM wp_posts p where post_type = 'resume' and post_status = 'publish' group by p.post_author) resumes 
                         on wp_users.id = resumes.post_author 
                 
                 LEFT JOIN (SELECT distinct(p.post_author), pm.meta_value as nacionalidade FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id 
-                            where p.post_type = 'resume' and pm.meta_key = '_candidate_nacionalidade') nacionalidades
+                            where p.post_type = 'resume' and post_status = 'publish' and pm.meta_key = '_candidate_nacionalidade') nacionalidades
                             on wp_users.id = nacionalidades.post_author
                             
 
                 LEFT JOIN (SELECT distinct(p.post_author), pm.meta_value as name FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id 
-                            where p.post_type = 'resume' and pm.meta_key = '_candidate_name') candidate_names
+                            where p.post_type = 'resume' and post_status = 'publish' and pm.meta_key = '_candidate_name') candidate_names
                             on wp_users.id = candidate_names.post_author
 
-                LEFT JOIN (SELECT max(p.post_modified) as resume_updated, p.post_author FROM wp_posts p where post_type = 'resume' group by p.post_author) resumes_updated                
+                LEFT JOIN (SELECT max(p.post_modified) as resume_updated, p.post_author FROM wp_posts p where post_type = 'resume' and post_status = 'publish' group by p.post_author) resumes_updated                
                         on wp_users.id = resumes_updated.post_author 
                         
                 WHERE 1=1
@@ -84,11 +84,11 @@ class WpUserController extends AbstractController {
                         . "OR candidate_names.name like '%" . $todos . "%' )";
             }
             if (!empty($dataInicio)) {
-                $query = $query . " AND wp_users.user_registered >= '" . $dataInicio->format("Y-m-d") . "'";
+                $query = $query . " AND wp_users.user_registered >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
             }
 
             if (!empty($dataFim)) {
-                $query = $query . " AND wp_users.user_registered < '" . $dataFim->format("Y-m-d") . "'";
+                $query = $query . " AND wp_users.user_registered < '" . $dataFim->format("Y-m-d") . " 23:59'";
             }
 
             if (!empty($pais)) {
