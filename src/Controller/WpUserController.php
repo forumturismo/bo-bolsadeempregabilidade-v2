@@ -33,10 +33,27 @@ class WpUserController extends AbstractController {
         $searchForm = $this->createForm('App\Form\WpDashboardSearchType', $wpDashboardSearch);
         $searchForm->handleRequest($request);
 
+        $curriculosToday = 0;
+        $curriculos7Days = 0;
+        $curriculos30Days = 0;
+
+        $vagasToday = 0;
+        $vagas7Days = 0;
+        $vagas30Days = 0;
+
+        $candidaturasToday = 0;
+        $candidaturas7Days = 0;
+        $candidaturas30Days = 0;
+        
+        
+        
+        
+        
         $candidatosFilter = 0;
         $curriculosFilter = 0;
         $vagasFilter = 0;
         $candidaturasFilter = 0;
+        
         $intervalInDays = 1;
         
 
@@ -45,10 +62,7 @@ class WpUserController extends AbstractController {
             $dataInicio = $searchForm["data_inicio"]->getData();
             $dataFim = $searchForm["data_fim"]->getData();
             
-            
             $candidatosFilter = $this->countCandidatos($dataInicio, $dataFim);
-            dump($candidatosFilter);
-            
             $curriculosFilter = $this->countCurriculos($dataInicio, $dataFim);
             $vagasFilter = $this->countVagas($dataInicio, $dataFim);
             $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
@@ -63,16 +77,19 @@ class WpUserController extends AbstractController {
         }
 
         // HOJE
+        
         $today = new \DateTime();
-        $last7Days = clone $today->modify("-7 day");
-        $last30Days = clone $today->modify("-23 day");
+        $datetime = new \DateTime();
+        //dump('today = '.$today);
+        
+        $last7Days = clone $datetime->modify("-7 day");
+        $last30Days = clone $datetime->modify("-23 day");
+
 
         $candidatosToday = $this->countCandidatos($today, $today);
-        
-        dump($candidatosToday);
-        
         $candidatos7Days = $this->countCandidatos($last7Days, $today);
         $candidatos30Days = $this->countCandidatos($last30Days, $today);
+        
 
         $curriculosToday = $this->countCurriculos($today, $today);
         $curriculos7Days = $this->countCurriculos($last7Days, $today);
@@ -115,7 +132,7 @@ class WpUserController extends AbstractController {
     }
 
     public function countCandidatos($dataInicio, $dataFim, $calculationMethod = 'count') {
-
+        
         $query = "SELECT ".$calculationMethod."(wp_users.id) as candidatos FROM wp_users where 1=1 ";
 
         if (!empty($dataInicio)) {
@@ -130,6 +147,7 @@ class WpUserController extends AbstractController {
         if($calculationMethod == "avg"):
 
         endif;
+        
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
         $candidatos = $resultSet->fetchAllAssociative();
