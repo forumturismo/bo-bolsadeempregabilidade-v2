@@ -40,6 +40,7 @@ class WpUserController extends AbstractController {
         $vagasToday = 0;
         $vagas7Days = 0;
         $vagas30Days = 0;
+        $vagasByLocationFilter = [];
 
         $candidaturasToday = 0;
         $candidaturas7Days = 0;
@@ -66,6 +67,14 @@ class WpUserController extends AbstractController {
             $curriculosFilter = $this->countCurriculos($dataInicio, $dataFim);
             $vagasFilter = $this->countVagas($dataInicio, $dataFim);
             $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
+            
+            //$candidatosByLocationFilter = $this->countCandidatos($dataInicio, $dataFim);
+            //$curriculosByLocationFilter = $this->countCurriculos($dataInicio, $dataFim);
+            $vagasByLocationFilter = $this->countVagasByLocation($dataInicio, $dataFim);
+            //$candidaturasByLocationFilter = $this->countCandidaturas($dataInicio, $dataFim);
+            
+            
+            
             
             $interval = $dataInicio->diff($dataFim);
             $intervalInDays = $interval->days + 1;
@@ -98,7 +107,10 @@ class WpUserController extends AbstractController {
         $vagasToday = $this->countVagas($today, $today);
         $vagas7Days = $this->countVagas($last7Days, $today);
         $vagas30Days = $this->countVagas($last30Days, $today);
+        
 
+        
+        
         $candidaturasToday = $this->countCandidaturas($today, $today);
         $candidaturas7Days = $this->countCandidaturas($last7Days, $today);
         $candidaturas30Days = $this->countCandidaturas($last30Days, $today);
@@ -118,11 +130,15 @@ class WpUserController extends AbstractController {
             'vagas7Days' => $vagas7Days,
             'vagas30Days' => $vagas30Days,
             'vagasFilter' => $vagasFilter,
+            'vagasByLocationFilter' => $vagasByLocationFilter,
             'candidaturasToday' => $candidaturasToday,
             'candidaturas7Days' => $candidaturas7Days,
             'candidaturas30Days' => $candidaturas30Days,
             'candidaturasFilter' => $candidaturasFilter,
             'intervalInDays' => $intervalInDays
+                
+                
+                
               
         ];
 
@@ -172,6 +188,12 @@ class WpUserController extends AbstractController {
         return $candidatos[0]['curriculos'];
     }
 
+    
+    
+    
+    
+    
+    
     public function countVagas($dataInicio, $dataFim) {
 
         $query = "SELECT count(p.id) as vagas FROM wp_posts p where post_type = 'job_listing' ";
@@ -190,6 +212,38 @@ class WpUserController extends AbstractController {
         return $vagas[0]['vagas'];
     }
 
+    
+       public function countVagasByLocation($dataInicio, $dataFim) {
+
+        $query = "SELECT count(p.id) as vagas, pm.meta_value as location "
+                . "FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
+                . "WHERE post_type = 'job_listing' and pm.meta_key = '_job_location'";
+                
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+        
+        $query = $query . " GROUP by location ORDER BY vagas DESC ";
+        
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $vagas = $resultSet->fetchAllAssociative();
+        
+
+        return $vagas;
+    }
+
+    
+    
+    
+    
+    
     public function countCandidaturas($dataInicio, $dataFim) {
 
         $query = "SELECT count(p.id) as candidaturas FROM wp_posts p where post_type = 'job_application' ";

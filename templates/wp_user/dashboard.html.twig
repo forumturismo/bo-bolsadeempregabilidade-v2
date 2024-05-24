@@ -86,7 +86,7 @@
                                 <tr>
                                     <td>Resultado do filtro</td>
                                     <td>{{ results['candidatosFilter'] /  results['intervalInDays'] }}</td>
-                                    <td>{{ results['candidatosFilter'] }}</td>intervalInDays
+                                    <td>{{ results['candidatosFilter'] }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -104,7 +104,7 @@
                                 </tr>
                             </thead>          
 
-                           <tbody>
+                            <tbody>
                                 <tr>
                                     <td>Hoje</td>
                                     <td>{{ results['curriculosToday'] }}</td>
@@ -127,7 +127,7 @@
                                 <tr>
                                     <td>Resultado do filtro</td>
                                     <td>{{ results['curriculosFilter'] /  results['intervalInDays'] }}</td>
-                                    <td>{{ results['curriculosFilter'] }}</td>intervalInDays
+                                    <td>{{ results['curriculosFilter'] }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -152,7 +152,7 @@
                                 </tr>
                             </thead>          
 
-                           <tbody>
+                            <tbody>
                                 <tr>
                                     <td>Hoje</td>
                                     <td>{{ results['vagasToday'] }}</td>
@@ -175,10 +175,35 @@
                                 <tr>
                                     <td>Resultado do filtro</td>
                                     <td>{{ results['vagasFilter'] /  results['intervalInDays'] }}</td>
-                                    <td>{{ results['vagasFilter'] }}</td>intervalInDays
+                                    <td>{{ results['vagasFilter'] }}</td>
                                 </tr>
+
+
+
                             </tbody>
                         </table>
+
+                        <table class="table table-sm">
+
+                            <tr>
+                                <td colspan="3"><b>Por Região</b></td>
+                            </tr>
+
+
+                            {% for vaga in results['vagasByLocationFilter'] %}
+                                <tr>
+                                    <td></td>
+                                    <td>{{ vaga.location }}</td>
+                                    <td>{{ vaga.vagas }}</td>
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        </table>
+
+
                     </div>
 
 
@@ -194,7 +219,7 @@
                                 </tr>
                             </thead>          
 
-                           <tbody>
+                            <tbody>
                                 <tr>
                                     <td>Hoje</td>
                                     <td>{{ results['candidaturasToday'] }}</td>
@@ -217,7 +242,7 @@
                                 <tr>
                                     <td>Resultado do filtro</td>
                                     <td>{{ results['candidaturasFilter'] /  results['intervalInDays'] }}</td>
-                                    <td>{{ results['candidaturasFilter'] }}</td>intervalInDays
+                                    <td>{{ results['candidaturasFilter'] }}</td>
                                 </tr>
                             </tbody>
                         </table>
