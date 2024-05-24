@@ -52,7 +52,7 @@ class WpUserController extends AbstractController {
             $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
             
             $interval = $dataInicio->diff($dataFim);
-            $intervalInDays = $interval->days;
+            $intervalInDays = $interval->days + 1;
            
             
             
