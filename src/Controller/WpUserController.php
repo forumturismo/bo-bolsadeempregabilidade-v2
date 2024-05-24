@@ -69,7 +69,7 @@ class WpUserController extends AbstractController {
             $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
             
             //$candidatosByLocationFilter = $this->countCandidatos($dataInicio, $dataFim);
-            //$curriculosByLocationFilter = $this->countCurriculos($dataInicio, $dataFim);
+            $curriculosByLocationFilter = $this->countCurriculosByLocation($dataInicio, $dataFim);
             $vagasByLocationFilter = $this->countVagasByLocation($dataInicio, $dataFim);
             //$candidaturasByLocationFilter = $this->countCandidaturas($dataInicio, $dataFim);
             
@@ -122,19 +122,24 @@ class WpUserController extends AbstractController {
             'candidatos7Days' => $candidatos7Days,
             'candidatos30Days' => $candidatos30Days,
             'candidatosFilter' => $candidatosFilter,
+            
             'curriculosToday' => $curriculosToday,
             'curriculos7Days' => $curriculos7Days,
             'curriculos30Days' => $curriculos30Days,
             'curriculosFilter' => $curriculosFilter,
+            'curriculosByLocationFilter' => $curriculosByLocationFilter,
+            
             'vagasToday' => $vagasToday,
             'vagas7Days' => $vagas7Days,
             'vagas30Days' => $vagas30Days,
             'vagasFilter' => $vagasFilter,
             'vagasByLocationFilter' => $vagasByLocationFilter,
+            
             'candidaturasToday' => $candidaturasToday,
             'candidaturas7Days' => $candidaturas7Days,
             'candidaturas30Days' => $candidaturas30Days,
             'candidaturasFilter' => $candidaturasFilter,
+            
             'intervalInDays' => $intervalInDays
                 
                 
@@ -189,7 +194,27 @@ class WpUserController extends AbstractController {
     }
 
     
-    
+        public function countCurriculosByLocation($dataInicio, $dataFim) {
+
+        $query = "SELECT count(p.id) as curriculos, pm.meta_value as location FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
+                . "where post_type = 'resume' and post_status = 'publish' and pm.meta_key = '_candidate_location'";
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+        $query = $query . " GROUP by location ORDER BY curriculos DESC ";
+        
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $curriculos = $resultSet->fetchAllAssociative();
+        return $curriculos;
+    }
+
     
     
     
@@ -228,7 +253,6 @@ class WpUserController extends AbstractController {
             $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
         }
 
-        
         $query = $query . " GROUP by location ORDER BY vagas DESC ";
         
         $stmt = $this->em->getConnection()->prepare($query);
