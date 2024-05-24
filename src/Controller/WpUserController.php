@@ -17,8 +17,173 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
  */
 class WpUserController extends AbstractController {
 
+    private $em;
+
+    public function __construct(\Doctrine\ORM\EntityManagerInterface $em) {
+        $this->em = $em;
+    }
+
     /**
-     * @Route("/", name="app_wp_user_index", methods={"GET|POST"})
+     * @Route("/dashboard", name="app_wp_user_dashboard", methods={"GET|POST"})
+     */
+    public function dashboard(\Doctrine\ORM\EntityManagerInterface $em, Request $request) {
+
+        $wpDashboardSearch = new \App\Entity\WpUserSearch();
+
+        $searchForm = $this->createForm('App\Form\WpDashboardSearchType', $wpDashboardSearch);
+        $searchForm->handleRequest($request);
+
+        $candidatosFilter = 0;
+        $curriculosFilter = 0;
+        $vagasFilter = 0;
+        $candidaturasFilter = 0;
+        $intervalInDays = 0;
+        
+
+        if ($searchForm->isSubmitted() && $searchForm->isValid()) {
+
+            $dataInicio = $searchForm["data_inicio"]->getData();
+            $dataFim = $searchForm["data_fim"]->getData();
+            
+            
+            $candidatosFilter = $this->countCandidatos($dataInicio, $dataFim);
+            $curriculosFilter = $this->countCurriculos($dataInicio, $dataFim);
+            $vagasFilter = $this->countVagas($dataInicio, $dataFim);
+            $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
+            
+            $interval = $dataInicio->diff($dataFim);
+            $intervalInDays = $interval->days;
+           
+            
+            
+            
+            
+        }
+
+        // HOJE
+        $today = new \DateTime();
+        $last7Days = clone $today->modify("-7 day");
+        $last30Days = clone $today->modify("-23 day");
+
+        $candidatosToday = $this->countCandidatos($today, $today);
+        $candidatos7Days = $this->countCandidatos($last7Days, $today);
+        $candidatos30Days = $this->countCandidatos($last30Days, $today);
+
+        $curriculosToday = $this->countCurriculos($today, $today);
+        $curriculos7Days = $this->countCurriculos($last7Days, $today);
+        $curriculos30Days = $this->countCurriculos($last30Days, $today);
+
+        $vagasToday = $this->countVagas($today, $today);
+        $vagas7Days = $this->countVagas($last7Days, $today);
+        $vagas30Days = $this->countVagas($last30Days, $today);
+
+        $candidaturasToday = $this->countCandidaturas($today, $today);
+        $candidaturas7Days = $this->countCandidaturas($last7Days, $today);
+        $candidaturas30Days = $this->countCandidaturas($last30Days, $today);
+
+        $results = ['candidatosToday' => $candidatosToday,
+            'candidatos7Days' => $candidatos7Days,
+            'candidatos30Days' => $candidatos30Days,
+            'candidatosFilter' => $candidatosFilter,
+            'curriculosToday' => $curriculosToday,
+            'curriculos7Days' => $curriculos7Days,
+            'curriculos30Days' => $curriculos30Days,
+            'curriculosFilter' => $curriculosFilter,
+            'vagasToday' => $vagasToday,
+            'vagas7Days' => $vagas7Days,
+            'vagas30Days' => $vagas30Days,
+            'vagasFilter' => $vagasFilter,
+            'candidaturasToday' => $candidaturasToday,
+            'candidaturas7Days' => $candidaturas7Days,
+            'candidaturas30Days' => $candidaturas30Days,
+            'candidaturasFilter' => $candidaturasFilter,
+            'intervalInDays' => $intervalInDays
+              
+        ];
+
+        // parameters to template
+        return $this->render('wp_user/dashboard.html.twig', ['search_form' => $searchForm->createView(), 'results' => $results
+        ]);
+    }
+
+    public function countCandidatos($dataInicio, $dataFim, $calculationMethod = 'count') {
+
+        $query = "SELECT ".$calculationMethod."(wp_users.id) as candidatos FROM wp_users where 1=1 ";
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND wp_users.user_registered >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND wp_users.user_registered < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+        
+        if($calculationMethod == "avg"):
+
+        endif;
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $candidatos = $resultSet->fetchAllAssociative();
+        return $candidatos[0]['candidatos'];
+    }
+
+    public function countCurriculos($dataInicio, $dataFim) {
+
+        $query = "SELECT count(p.id) as curriculos FROM wp_posts p where post_type = 'resume' and post_status = 'publish' ";
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $candidatos = $resultSet->fetchAllAssociative();
+        return $candidatos[0]['curriculos'];
+    }
+
+    public function countVagas($dataInicio, $dataFim) {
+
+        $query = "SELECT count(p.id) as vagas FROM wp_posts p where post_type = 'job_listing' ";
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $vagas = $resultSet->fetchAllAssociative();
+        return $vagas[0]['vagas'];
+    }
+
+    public function countCandidaturas($dataInicio, $dataFim) {
+
+        $query = "SELECT count(p.id) as candidaturas FROM wp_posts p where post_type = 'job_application' ";
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $candidaturas = $resultSet->fetchAllAssociative();
+        return $candidaturas[0]['candidaturas'];
+    }
+
+    /**
+     * @Route("/index", name="app_wp_user_index", methods={"GET|POST"})
      */
     public function index(\Doctrine\ORM\EntityManagerInterface $em, \Knp\Component\Pager\PaginatorInterface $paginator, Request $request) {
 
@@ -32,7 +197,7 @@ class WpUserController extends AbstractController {
         $nacionalidades = $resultSetNacionalidades->fetchAllAssociative();
 
         $new_nacionalidades["Todos"] = "";
-        
+
         foreach ($nacionalidades as $key => $value) {
             $new_nacionalidades[$value['nacionalidade']] = $value['nacionalidade'];
         }
@@ -125,10 +290,8 @@ class WpUserController extends AbstractController {
 
         $pagination->setParam('section', 'supplier');
 
-
         // parameters to template
         return $this->render('wp_user/index.html.twig', ['search_form' => $searchForm->createView(), 'pagination' => $pagination]);
-
     }
 
     public function exportToExcel($users) {

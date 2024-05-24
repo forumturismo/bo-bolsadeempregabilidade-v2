@@ -41,54 +41,54 @@
                             <a class="nav-link" aria-current="page" href="#">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Dashboard</a>
+                            <a class="nav-link {% if (app.request.get('_route') == "app_wp_user_dashboard") %} {{ "active" }} {% endif %}" href="{{ path('app_wp_user_dashboard') }}">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="#" >Candidatos</a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link disabled" href="#" >Option 4</a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link disabled" href="#" >Option 5</a>
-                        </li>
-                        
-                        {#<li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="dropdown07XL" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdown07XL">
-                                <li><a class="dropdown-item" href="#">Action</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            </ul>
-                        </li>#}
-                    </ul>
-                    
-{#                    <div class="col-md-3 text-end">
-        <button type="button" class="btn btn-outline-primary me-2">Login</button>
-        <button type="button" class="btn btn-primary">Sign-up</button>
-      </div>#}
-                    
-                    <div class="text-end">
-          <button type="button" class="btn btn-outline-light me-2">Login</button>
-          <button type="button" class="btn btn-warning">Sign-up</button>
-        </div>
-                    
-                    {#<form>
-                        <input class="form-control" type="text" placeholder="Search" aria-label="Search">
-                    </form>#}
+                            <a class="nav-link {% if (app.request.get('_route') == "app_wp_user_index") %} {{ "active" }} {% endif %}" href="{{ path('app_wp_user_index') }}" >Candidatos</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link disabled" href="#" >Option 4</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link disabled" href="#" >Option 5</a>
+                            </li>
+
+                            {#<li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdown07XL" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdown07XL">
+                                    <li><a class="dropdown-item" href="#">Action</a></li>
+                                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                </ul>
+                            </li>#}
+                        </ul>
+
+                        {#                    <div class="col-md-3 text-end">
+                                <button type="button" class="btn btn-outline-primary me-2">Login</button>
+                                <button type="button" class="btn btn-primary">Sign-up</button>
+                              </div>#}
+
+                        <div class="text-end">
+                            <button type="button" class="btn btn-outline-light me-2">Login</button>
+                            <button type="button" class="btn btn-warning">Sign-up</button>
+                        </div>
+
+                        {#<form>
+                            <input class="form-control" type="text" placeholder="Search" aria-label="Search">
+                        </form>#}
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
 
-        <main>
-        
-            <!-- Content here -->   
-            {% block body %}
-            {% endblock %}
-        
-        </main>
-    </body>
-</html>
+            <main>
+
+                <!-- Content here -->   
+                {% block body %}
+                {% endblock %}
+
+            </main>
+        </body>
+    </html>
