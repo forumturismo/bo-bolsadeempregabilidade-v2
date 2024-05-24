@@ -47,6 +47,8 @@ class WpUserController extends AbstractController {
             
             
             $candidatosFilter = $this->countCandidatos($dataInicio, $dataFim);
+            dump($candidatosFilter);
+            
             $curriculosFilter = $this->countCurriculos($dataInicio, $dataFim);
             $vagasFilter = $this->countVagas($dataInicio, $dataFim);
             $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
@@ -66,6 +68,9 @@ class WpUserController extends AbstractController {
         $last30Days = clone $today->modify("-23 day");
 
         $candidatosToday = $this->countCandidatos($today, $today);
+        
+        dump($candidatosToday);
+        
         $candidatos7Days = $this->countCandidatos($last7Days, $today);
         $candidatos30Days = $this->countCandidatos($last30Days, $today);
 
