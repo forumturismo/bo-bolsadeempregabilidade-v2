@@ -46,7 +46,7 @@ class WpUserController extends AbstractController {
         $candidaturasToday = 0;
         $candidaturas7Days = 0;
         $candidaturas30Days = 0;
-        
+        $candidaturasByLocationFilter = [];
         
         
         
@@ -72,7 +72,7 @@ class WpUserController extends AbstractController {
             //$candidatosByLocationFilter = $this->countCandidatos($dataInicio, $dataFim);
             $curriculosByLocationFilter = $this->countCurriculosByLocation($dataInicio, $dataFim);
             $vagasByLocationFilter = $this->countVagasByLocation($dataInicio, $dataFim);
-            //$candidaturasByLocationFilter = $this->countCandidaturas($dataInicio, $dataFim);
+            $candidaturasByLocationFilter = $this->countCandidaturasByLocation($dataInicio, $dataFim);
             
             
             
@@ -140,6 +140,7 @@ class WpUserController extends AbstractController {
             'candidaturas7Days' => $candidaturas7Days,
             'candidaturas30Days' => $candidaturas30Days,
             'candidaturasFilter' => $candidaturasFilter,
+            'candidaturasByLocationFilter' => $candidaturasByLocationFilter ,
             
             'intervalInDays' => $intervalInDays
                 
@@ -286,6 +287,35 @@ class WpUserController extends AbstractController {
         $candidaturas = $resultSet->fetchAllAssociative();
         return $candidaturas[0]['candidaturas'];
     }
+    
+    
+    
+        public function countCandidaturasByLocation($dataInicio, $dataFim) {
+
+        $query = "SELECT count(p.id) as candidaturas , pm.meta_value as location "
+                . "FROM wp_posts p join wp_postmeta pm on p.post_parent = pm.post_id "
+                . "where post_type = 'job_application' and pm.meta_key = '_job_location' ";
+
+        if (!empty($dataInicio)) {
+            $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
+        }
+
+        if (!empty($dataFim)) {
+            $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
+        }
+
+         $query = $query . " GROUP by location ORDER BY candidaturas DESC ";
+        
+        $stmt = $this->em->getConnection()->prepare($query);
+        $resultSet = $stmt->executeQuery();
+        $candidaturas = $resultSet->fetchAllAssociative();
+        return $candidaturas;
+    }
+
+    
+    
+    
+    
 
     /**
      * @Route("/index", name="app_wp_user_index", methods={"GET|POST"})
