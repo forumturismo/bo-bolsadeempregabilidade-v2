@@ -37,7 +37,7 @@ class WpUserController extends AbstractController {
         $curriculosFilter = 0;
         $vagasFilter = 0;
         $candidaturasFilter = 0;
-        $intervalInDays = 0;
+        $intervalInDays = 1;
         
 
         if ($searchForm->isSubmitted() && $searchForm->isValid()) {
@@ -81,6 +81,9 @@ class WpUserController extends AbstractController {
         $candidaturas7Days = $this->countCandidaturas($last7Days, $today);
         $candidaturas30Days = $this->countCandidaturas($last30Days, $today);
 
+        
+        
+        
         $results = ['candidatosToday' => $candidatosToday,
             'candidatos7Days' => $candidatos7Days,
             'candidatos30Days' => $candidatos30Days,
