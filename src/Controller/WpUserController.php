@@ -36,6 +36,7 @@ class WpUserController extends AbstractController {
         $curriculosToday = 0;
         $curriculos7Days = 0;
         $curriculos30Days = 0;
+        $curriculosByLocationFilter = [];
 
         $vagasToday = 0;
         $vagas7Days = 0;
