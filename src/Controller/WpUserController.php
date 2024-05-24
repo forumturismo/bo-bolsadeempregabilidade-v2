@@ -82,8 +82,8 @@ class WpUserController extends AbstractController {
         $datetime = new \DateTime();
         //dump('today = '.$today);
         
-        $last7Days = clone $datetime->modify("-7 day");
-        $last30Days = clone $datetime->modify("-23 day");
+        $last7Days = clone $datetime->modify("-6 day");
+        $last30Days = clone $datetime->modify("-22 day");
 
 
         $candidatosToday = $this->countCandidatos($today, $today);
