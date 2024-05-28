@@ -82,19 +82,19 @@
 
                                 <tr>
                                     <td>Últimos 7 dias</td>
-                                    <td>{{ (results['candidatos7Days'] / 7)|round(2, 'floor') }}</td>
+                                    <td>{{ (results['candidatos7Days'] / 7)|round(0, 'ceil') }}</td>
                                     <td>{{ results['candidatos7Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Últimos 30 dias</td>
-                                    <td>{{ (results['candidatos30Days'] /30) |round(2, 'floor')}}</td>
+                                    <td>{{ (results['candidatos30Days'] /30) |round(0, 'ceil')}}</td>
                                     <td>{{ results['candidatos30Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Resultado do filtro</td>
-                                    <td>{{ (results['candidatosFilter'] /  results['intervalInDays']) |round(2, 'floor')}}</td>
+                                    <td>{{ (results['candidatosFilter'] /  results['intervalInDays']) |round(0, 'ceil')}}</td>
                                     <td>{{ results['candidatosFilter'] }}</td>
                                 </tr>
                             </tbody>
@@ -123,19 +123,19 @@
 
                                 <tr>
                                     <td>Últimos 7 dias</td>
-                                    <td>{{ (results['curriculos7Days'] / 7 ) |round(2, 'floor')}}</td>
+                                    <td>{{ (results['curriculos7Days'] / 7 ) |round(0, 'ceil')}}</td>
                                     <td>{{ results['curriculos7Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Últimos 30 dias</td>
-                                    <td>{{ (results['curriculos30Days'] /30) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['curriculos30Days'] /30) |round(0, 'ceil') }}</td>
                                     <td>{{ results['curriculos30Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Resultado do filtro</td>
-                                    <td>{{ (results['curriculosFilter'] /  results['intervalInDays']) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['curriculosFilter'] /  results['intervalInDays']) |round(0, 'ceil') }}</td>
                                     <td>{{ results['curriculosFilter'] }}</td>
                                 </tr>
                             </tbody>
@@ -192,19 +192,19 @@
 
                                 <tr>
                                     <td>Últimos 7 dias</td>
-                                    <td>{{ (results['vagas7Days'] / 7) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['vagas7Days'] / 7) |round(0, 'ceil') }}</td>
                                     <td>{{ results['vagas7Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Últimos 30 dias</td>
-                                    <td>{{ (results['vagas30Days'] /30) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['vagas30Days'] /30) |round(0, 'ceil') }}</td>
                                     <td>{{ results['vagas30Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Resultado do filtro</td>
-                                    <td>{{ (results['vagasFilter'] /  results['intervalInDays']) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['vagasFilter'] /  results['intervalInDays']) |round(0, 'ceil') }}</td>
                                     <td>{{ results['vagasFilter'] }}</td>
                                 </tr>
 
@@ -255,19 +255,19 @@
 
                                 <tr>
                                     <td>Últimos 7 dias</td>
-                                    <td>{{ (results['candidaturas7Days'] / 7) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['candidaturas7Days'] / 7) |round(0, 'ceil') }}</td>
                                     <td>{{ results['candidaturas7Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Últimos 30 dias</td>
-                                    <td>{{ (results['candidaturas30Days'] /30 ) |round(2, 'floor')}}</td>
+                                    <td>{{ (results['candidaturas30Days'] /30 ) |round(0, 'ceil')}}</td>
                                     <td>{{ results['candidaturas30Days'] }}</td>
                                 </tr>
 
                                 <tr>
                                     <td>Resultado do filtro</td>
-                                    <td>{{ (results['candidaturasFilter'] /  results['intervalInDays']) |round(2, 'floor') }}</td>
+                                    <td>{{ (results['candidaturasFilter'] /  results['intervalInDays']) |round(0, 'ceil') }}</td>
                                     <td>{{ results['candidaturasFilter'] }}</td>
                                 </tr>
                             </tbody>

@@ -3,11 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/templates/wp_user/index.html.twig</file>
+            <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/.gitignore</file>
             <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/templates/base.html.twig</file>
             <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/src/Controller/WpUserController.php</file>
-            <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/src/Form/WpUserSearchType.php</file>
-            <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/templates/wp_user/index.html.twig</file>
             <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/templates/wp_user/dashboard.html.twig</file>
+            <file>file:/home/luis/sfprojects/forum/bo-bolsadeempregabilidade/src/Form/WpUserSearchType.php</file>
         </group>
     </open-files>
 </project-private>
