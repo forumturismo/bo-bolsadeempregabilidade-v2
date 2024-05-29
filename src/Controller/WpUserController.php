@@ -201,7 +201,7 @@ class WpUserController extends AbstractController {
 
     public function countVagas($dataInicio, $dataFim) {
 
-        $query = "SELECT count(p.id) as vagas FROM wp_posts p where post_type = 'job_listing' ";
+        $query = "SELECT count(p.id) as vagas FROM wp_posts p where post_type = 'job_listing' and post_status = 'publish' ";
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
@@ -257,7 +257,7 @@ class WpUserController extends AbstractController {
 
     public function countCandidaturas($dataInicio, $dataFim) {
 
-        $query = "SELECT count(p.id) as candidaturas FROM wp_posts p where post_type = 'job_application' ";
+        $query = "SELECT count(p.id) as candidaturas FROM wp_posts p where post_type = 'job_application'  ";
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
