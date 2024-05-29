@@ -41,12 +41,12 @@ class WpUserController extends AbstractController {
         $vagasToday = 0;
         $vagas7Days = 0;
         $vagas30Days = 0;
-        $vagasByLocationFilter = [];
+        $vagasByRegionFilter = [];
 
         $candidaturasToday = 0;
         $candidaturas7Days = 0;
         $candidaturas30Days = 0;
-        $candidaturasByLocationFilter = [];
+        $candidaturasByRegionFilter = [];
 
         $candidatosFilter = 0;
         $curriculosFilter = 0;
@@ -77,8 +77,8 @@ class WpUserController extends AbstractController {
 
             //$candidatosByLocationFilter = $this->countCandidatos($dataInicio, $dataFim);
             $curriculosByLocationFilter = $this->countCurriculosByLocation($dataInicio, $dataFim);
-            $vagasByLocationFilter = $this->countVagasByLocation($dataInicio, $dataFim);
-            $candidaturasByLocationFilter = $this->countCandidaturasByLocation($dataInicio, $dataFim);
+            $vagasByRegionFilter = $this->countVagasByRegion($dataInicio, $dataFim);
+            $candidaturasByRegionFilter = $this->countCandidaturasByRegion($dataInicio, $dataFim);
 
             $interval = $dataInicio->diff($dataFim);
             $intervalInDays = $interval->days + 1;
@@ -122,12 +122,12 @@ class WpUserController extends AbstractController {
             'vagas7Days' => $vagas7Days,
             'vagas30Days' => $vagas30Days,
             'vagasFilter' => $vagasFilter,
-            'vagasByLocationFilter' => $vagasByLocationFilter,
+            'vagasByRegionFilter' => $vagasByRegionFilter,
             'candidaturasToday' => $candidaturasToday,
             'candidaturas7Days' => $candidaturas7Days,
             'candidaturas30Days' => $candidaturas30Days,
             'candidaturasFilter' => $candidaturasFilter,
-            'candidaturasByLocationFilter' => $candidaturasByLocationFilter,
+            'candidaturasByRegionFilter' => $candidaturasByRegionFilter,
             'intervalInDays' => $intervalInDays
         ];
 
@@ -217,11 +217,26 @@ class WpUserController extends AbstractController {
         return $vagas[0]['vagas'];
     }
 
-    public function countVagasByLocation($dataInicio, $dataFim) {
+    public function countVagasByRegion($dataInicio, $dataFim) {
 
-        $query = "SELECT count(p.id) as vagas, pm.meta_value as location "
-                . "FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
-                . "WHERE post_type = 'job_listing' and pm.meta_key = '_job_location'";
+//        $query = "SELECT count(p.id) as vagas, pm.meta_value as location "
+//                . "FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
+//                . "WHERE post_type = 'job_listing' and pm.meta_key = '_job_location'";
+        
+        
+        $query = "SELECT  count(p.id) as vagas, wp_terms.name as region
+                FROM wp_posts p  
+                join wp_term_relationships on p.id = wp_term_relationships.object_id
+                join wp_term_taxonomy on wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id 
+                join wp_terms on wp_term_taxonomy.term_id = wp_terms.term_id
+                WHERE post_type = 'job_listing' and post_status = 'publish' 
+                and wp_term_taxonomy.taxonomy = 'job_listing_region' ";
+        
+        
+        
+        
+        
+        //adicionar post_status
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
@@ -231,7 +246,7 @@ class WpUserController extends AbstractController {
             $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
         }
 
-        $query = $query . " GROUP by location ORDER BY vagas DESC ";
+        $query = $query . " GROUP by region ORDER BY vagas DESC ";
 
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
@@ -258,12 +273,23 @@ class WpUserController extends AbstractController {
         return $candidaturas[0]['candidaturas'];
     }
 
-    public function countCandidaturasByLocation($dataInicio, $dataFim) {
+    public function countCandidaturasByRegion($dataInicio, $dataFim) {
 
-        $query = "SELECT count(p.id) as candidaturas , pm.meta_value as location "
-                . "FROM wp_posts p join wp_postmeta pm on p.post_parent = pm.post_id "
-                . "where post_type = 'job_application' and pm.meta_key = '_job_location' ";
+//        $query = "SELECT count(p.id) as candidaturas , pm.meta_value as location "
+//                . "FROM wp_posts p join wp_postmeta pm on p.post_parent = pm.post_id "
+//                . "where post_type = 'job_application' and pm.meta_key = '_job_location' ";
 
+        
+          $query = "SELECT count(p.id) as candidaturas, wp_terms.name as region
+                FROM wp_posts p 
+                join wp_term_relationships on p.post_parent = wp_term_relationships.object_id
+                join wp_term_taxonomy on wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id 
+                join wp_terms on wp_term_taxonomy.term_id = wp_terms.term_id
+                WHERE post_type = 'job_application'  
+                and wp_term_taxonomy.taxonomy = 'job_listing_region' ";
+        
+        
+        
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
         }
@@ -272,7 +298,7 @@ class WpUserController extends AbstractController {
             $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
         }
 
-        $query = $query . " GROUP by location ORDER BY candidaturas DESC ";
+        $query = $query . " GROUP by region ORDER BY candidaturas DESC ";
 
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();

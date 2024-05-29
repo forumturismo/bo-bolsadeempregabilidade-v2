@@ -220,10 +220,10 @@
                                 <tr>
                                     <td colspan="3"><b>Por Região</b></td>
                                 </tr>
-                                {% for vaga in results['vagasByLocationFilter'] %}
+                                {% for vaga in results['vagasByRegionFilter'] %}
                                     <tr>
                                         <td></td>
-                                        <td>{{ vaga.location }}</td>
+                                        <td>{{ vaga.region }}</td>
                                         <td>{{ vaga.vagas }}</td>
                                     </tr>
                                 {% endfor %}
@@ -278,10 +278,10 @@
                                 <tr>
                                     <td colspan="3"><b>Por Região</b></td>
                                 </tr>
-                                {% for candidatura in results['candidaturasByLocationFilter'] %}
+                                {% for candidatura in results['candidaturasByRegionFilter'] %}
                                     <tr>
                                         <td></td>
-                                        <td>{{ candidatura.location }}</td>
+                                        <td>{{ candidatura.region }}</td>
                                         <td>{{ candidatura.candidaturas }}</td>
                                     </tr>
                                 {% endfor %}
