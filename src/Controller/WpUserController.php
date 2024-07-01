@@ -59,6 +59,7 @@ class WpUserController extends AbstractController {
 
             $dataInicio = $searchForm["data_inicio"]->getData();
             $dataFim = $searchForm["data_fim"]->getData();
+            $location = $searchForm["location"]->getData();
 
             if ($dataInicio == NULL):
                 $datetime = new \DateTime();
@@ -71,9 +72,9 @@ class WpUserController extends AbstractController {
             endif;
 
             $candidatosFilter = $this->countCandidatos($dataInicio, $dataFim);
-            $curriculosFilter = $this->countCurriculos($dataInicio, $dataFim);
-            $vagasFilter = $this->countVagas($dataInicio, $dataFim);
-            $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim);
+            $curriculosFilter = $this->countCurriculos($dataInicio, $dataFim, $location);
+            $vagasFilter = $this->countVagas($dataInicio, $dataFim, $location);
+            $candidaturasFilter = $this->countCandidaturas($dataInicio, $dataFim, $location);
 
             //$candidatosByLocationFilter = $this->countCandidatos($dataInicio, $dataFim);
             $curriculosByLocationFilter = $this->countCurriculosByLocation($dataInicio, $dataFim);
@@ -82,32 +83,61 @@ class WpUserController extends AbstractController {
 
             $interval = $dataInicio->diff($dataFim);
             $intervalInDays = $interval->days + 1;
+
+            // HOJE
+
+            $today = new \DateTime();
+            $datetime = new \DateTime();
+            //dump('today = '.$today);
+
+            $last7Days = clone $datetime->modify("-6 day");
+            $last30Days = clone $datetime->modify("-22 day");
+
+            $candidatosToday = $this->countCandidatos($today, $today);
+            $candidatos7Days = $this->countCandidatos($last7Days, $today);
+            $candidatos30Days = $this->countCandidatos($last30Days, $today);
+
+            $curriculosToday = $this->countCurriculos($today, $today, $location);
+            $curriculos7Days = $this->countCurriculos($last7Days, $today, $location);
+            $curriculos30Days = $this->countCurriculos($last30Days, $today, $location);
+
+            $vagasToday = $this->countVagas($today, $today, $location);
+            $vagas7Days = $this->countVagas($last7Days, $today, $location);
+            $vagas30Days = $this->countVagas($last30Days, $today, $location);
+
+            $candidaturasToday = $this->countCandidaturas($today, $today, $location);
+            $candidaturas7Days = $this->countCandidaturas($last7Days, $today, $location);
+            $candidaturas30Days = $this->countCandidaturas($last30Days, $today, $location);
+        } else {
+
+
+            // HOJE
+
+            $today = new \DateTime();
+            $datetime = new \DateTime();
+            //dump('today = '.$today);
+
+            $last7Days = clone $datetime->modify("-6 day");
+            $last30Days = clone $datetime->modify("-22 day");
+
+            $candidatosToday = $this->countCandidatos($today, $today);
+            $candidatos7Days = $this->countCandidatos($last7Days, $today);
+            $candidatos30Days = $this->countCandidatos($last30Days, $today);
+
+            $curriculosToday = $this->countCurriculos($today, $today, null);
+            $curriculos7Days = $this->countCurriculos($last7Days, $today, null);
+            $curriculos30Days = $this->countCurriculos($last30Days, $today, null);
+
+            $vagasToday = $this->countVagas($today, $today, null);
+            $vagas7Days = $this->countVagas($last7Days, $today, null);
+            $vagas30Days = $this->countVagas($last30Days, $today, null);
+
+            $candidaturasToday = $this->countCandidaturas($today, $today, null);
+            $candidaturas7Days = $this->countCandidaturas($last7Days, $today, null);
+            $candidaturas30Days = $this->countCandidaturas($last30Days, $today, null);
         }
 
-        // HOJE
 
-        $today = new \DateTime();
-        $datetime = new \DateTime();
-        //dump('today = '.$today);
-
-        $last7Days = clone $datetime->modify("-6 day");
-        $last30Days = clone $datetime->modify("-22 day");
-
-        $candidatosToday = $this->countCandidatos($today, $today);
-        $candidatos7Days = $this->countCandidatos($last7Days, $today);
-        $candidatos30Days = $this->countCandidatos($last30Days, $today);
-
-        $curriculosToday = $this->countCurriculos($today, $today);
-        $curriculos7Days = $this->countCurriculos($last7Days, $today);
-        $curriculos30Days = $this->countCurriculos($last30Days, $today);
-
-        $vagasToday = $this->countVagas($today, $today);
-        $vagas7Days = $this->countVagas($last7Days, $today);
-        $vagas30Days = $this->countVagas($last30Days, $today);
-
-        $candidaturasToday = $this->countCandidaturas($today, $today);
-        $candidaturas7Days = $this->countCandidaturas($last7Days, $today);
-        $candidaturas30Days = $this->countCandidaturas($last30Days, $today);
 
         $results = ['candidatosToday' => $candidatosToday,
             'candidatos7Days' => $candidatos7Days,
@@ -160,9 +190,10 @@ class WpUserController extends AbstractController {
         return $candidatos[0]['candidatos'];
     }
 
-    public function countCurriculos($dataInicio, $dataFim) {
+    public function countCurriculos($dataInicio, $dataFim, $location) {
 
-        $query = "SELECT count(p.id) as curriculos FROM wp_posts p where post_type = 'resume' and post_status = 'publish' ";
+        $query = "SELECT count(p.id) as curriculos FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
+                . "where post_type = 'resume' and post_status = 'publish' ";
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
@@ -172,6 +203,12 @@ class WpUserController extends AbstractController {
             $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
         }
 
+        if (!empty($location)) {
+            $query = $query . "and pm.meta_key = '_candidate_location' and pm.meta_value = '" . $location."'";
+        }
+
+//dump($query);
+        
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
         $candidatos = $resultSet->fetchAllAssociative();
@@ -199,9 +236,18 @@ class WpUserController extends AbstractController {
         return $curriculos;
     }
 
-    public function countVagas($dataInicio, $dataFim) {
+    public function countVagas($dataInicio, $dataFim, $location) {
 
-        $query = "SELECT count(p.id) as vagas FROM wp_posts p where post_type = 'job_listing' and post_status = 'publish' ";
+       // $query = "SELECT count(p.id) as vagas FROM wp_posts p where post_type = 'job_listing' and post_status = 'publish' ";
+        
+        
+                $query = "SELECT count(p.id) as vagas
+                FROM wp_posts p  
+                join wp_term_relationships on p.id = wp_term_relationships.object_id
+                join wp_term_taxonomy on wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id 
+                join wp_terms on wp_term_taxonomy.term_id = wp_terms.term_id
+                WHERE post_type = 'job_listing' and post_status = 'publish' 
+                and wp_term_taxonomy.taxonomy = 'job_listing_region' ";
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
@@ -211,6 +257,11 @@ class WpUserController extends AbstractController {
             $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
         }
 
+        if (!empty($location)) {
+            $query = $query . "and wp_terms.name = '" . $location."'";
+        }
+        
+        
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
         $vagas = $resultSet->fetchAllAssociative();
@@ -222,8 +273,8 @@ class WpUserController extends AbstractController {
 //        $query = "SELECT count(p.id) as vagas, pm.meta_value as location "
 //                . "FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
 //                . "WHERE post_type = 'job_listing' and pm.meta_key = '_job_location'";
-        
-        
+
+
         $query = "SELECT  count(p.id) as vagas, wp_terms.name as region
                 FROM wp_posts p  
                 join wp_term_relationships on p.id = wp_term_relationships.object_id
@@ -231,11 +282,7 @@ class WpUserController extends AbstractController {
                 join wp_terms on wp_term_taxonomy.term_id = wp_terms.term_id
                 WHERE post_type = 'job_listing' and post_status = 'publish' 
                 and wp_term_taxonomy.taxonomy = 'job_listing_region' ";
-        
-        
-        
-        
-        
+
         //adicionar post_status
 
         if (!empty($dataInicio)) {
@@ -255,9 +302,17 @@ class WpUserController extends AbstractController {
         return $vagas;
     }
 
-    public function countCandidaturas($dataInicio, $dataFim) {
+    public function countCandidaturas($dataInicio, $dataFim, $location) {
 
-        $query = "SELECT count(p.id) as candidaturas FROM wp_posts p where post_type = 'job_application'  ";
+        //$query = "SELECT count(p.id) as candidaturas FROM wp_posts p where post_type = 'job_application'  ";
+        
+        $query = "SELECT count(p.id) as candidaturas
+                FROM wp_posts p 
+                join wp_term_relationships on p.post_parent = wp_term_relationships.object_id
+                join wp_term_taxonomy on wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id 
+                join wp_terms on wp_term_taxonomy.term_id = wp_terms.term_id
+                WHERE post_type = 'job_application'  
+                and wp_term_taxonomy.taxonomy = 'job_listing_region' ";
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
@@ -267,6 +322,14 @@ class WpUserController extends AbstractController {
             $query = $query . " AND p.post_date < '" . $dataFim->format("Y-m-d") . " 23:59'";
         }
 
+        
+        if (!empty($location)) {
+            $query = $query . "and wp_terms.name = '" . $location."'";
+        }
+        
+        
+        //  dump($query);
+        
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
         $candidaturas = $resultSet->fetchAllAssociative();
@@ -279,17 +342,15 @@ class WpUserController extends AbstractController {
 //                . "FROM wp_posts p join wp_postmeta pm on p.post_parent = pm.post_id "
 //                . "where post_type = 'job_application' and pm.meta_key = '_job_location' ";
 
-        
-          $query = "SELECT count(p.id) as candidaturas, wp_terms.name as region
+
+        $query = "SELECT count(p.id) as candidaturas, wp_terms.name as region
                 FROM wp_posts p 
                 join wp_term_relationships on p.post_parent = wp_term_relationships.object_id
                 join wp_term_taxonomy on wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id 
                 join wp_terms on wp_term_taxonomy.term_id = wp_terms.term_id
                 WHERE post_type = 'job_application'  
                 and wp_term_taxonomy.taxonomy = 'job_listing_region' ";
-        
-        
-        
+
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
         }

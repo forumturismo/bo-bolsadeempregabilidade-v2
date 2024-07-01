@@ -12,6 +12,7 @@ class WpUserSearch
     private $dataInicio;
     private $dataFim;
     private $pais;
+    private $location;
     
     public function getTodos() {
         return $this->todos;
@@ -46,7 +47,15 @@ class WpUserSearch
     }
 
 
-    
+    public function getLocation() {
+        return $this->location;
+    }
+
+    public function setLocation($location): void {
+        $this->location = $location;
+    }
+
+
     
     
     

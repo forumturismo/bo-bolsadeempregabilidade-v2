@@ -16,6 +16,25 @@ class WpDashboardSearchType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options) {
 
 
+        $regions = ['Lisboa' => 'Lisboa',
+            'Faro' => 'Faro',
+            'Porto' => 'Porto',
+            'Estrangeiro' => 'Estrangeiro',
+            'Évora' => 'Évora',
+            'Coimbra' => 'Coimbra',
+            'Setúbal' => 'Setúbal',
+            'Beja' => 'Beja',
+            'Região Autónoma da Madeira' => 'Região Autónoma da Madeira',
+            'Leiria' => 'Leiria',
+            'Braga' => 'Braga',
+            'Aveiro' => 'Aveiro',
+            'Santarém' => 'Santarém',
+            'Portalegre' => 'Portalegre',
+            'Região Autónoma dos Açores' => 'Região Autónoma dos Açores',
+            'Viana do Castelo' => 'Viana do Castelo',
+            'Guarda' => 'Guarda',
+            'Castelo Branco' => 'Castelo Branco'];
+
         $builder
                 ->add('data_inicio', \Symfony\Component\Form\Extension\Core\Type\DateType::class, [
                     'required' => false, ''
@@ -24,7 +43,11 @@ class WpDashboardSearchType extends AbstractType {
                 ->add('data_fim', \Symfony\Component\Form\Extension\Core\Type\DateType::class, [
                     'required' => false,
                     'empty_data' => '',
-                ]);
+                ])->add('location', ChoiceType::class, array(
+            'choices' => $regions,
+            'required' => false,
+            'multiple' => false,
+            'expanded' => false));
     }
 
     /**
