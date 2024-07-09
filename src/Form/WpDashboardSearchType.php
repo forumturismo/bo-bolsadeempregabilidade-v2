@@ -16,7 +16,9 @@ class WpDashboardSearchType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options) {
 
 
-        $regions = ['Lisboa' => 'Lisboa',
+        $regions = [
+            'Todas as Regiões' => '', 
+            'Lisboa' => 'Lisboa',
             'Faro' => 'Faro',
             'Porto' => 'Porto',
             'Estrangeiro' => 'Estrangeiro',
@@ -45,7 +47,8 @@ class WpDashboardSearchType extends AbstractType {
                     'empty_data' => '',
                 ])->add('location', ChoiceType::class, array(
             'choices' => $regions,
-            'required' => false,
+            'required' => true,
+              
             'multiple' => false,
             'expanded' => false));
     }
