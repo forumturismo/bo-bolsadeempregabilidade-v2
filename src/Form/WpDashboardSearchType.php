@@ -48,7 +48,7 @@ class WpDashboardSearchType extends AbstractType {
                 ])->add('location', ChoiceType::class, array(
             'choices' => $regions,
             'required' => true,
-              
+            'label' => "Região",
             'multiple' => false,
             'expanded' => false));
     }
