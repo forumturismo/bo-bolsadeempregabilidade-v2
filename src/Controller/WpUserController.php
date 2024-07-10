@@ -193,7 +193,7 @@ class WpUserController extends AbstractController {
     public function countCurriculos($dataInicio, $dataFim, $location) {
 
         $query = "SELECT count(p.id) as curriculos FROM wp_posts p join wp_postmeta pm on p.id = pm.post_id "
-                . "where post_type = 'resume' and post_status = 'publish' ";
+                . "where post_type = 'resume' and post_status = 'publish' and pm.meta_key = '_candidate_location'";
 
         if (!empty($dataInicio)) {
             $query = $query . " AND p.post_date >= '" . $dataInicio->format("Y-m-d") . " 00:00'";
@@ -207,7 +207,7 @@ class WpUserController extends AbstractController {
             $query = $query . "and pm.meta_key = '_candidate_location' and pm.meta_value = '" . $location."'";
         }
 
-//dump($query);
+
         
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
@@ -229,6 +229,8 @@ class WpUserController extends AbstractController {
         }
 
         $query = $query . " GROUP by location ORDER BY curriculos DESC ";
+        
+    
 
         $stmt = $this->em->getConnection()->prepare($query);
         $resultSet = $stmt->executeQuery();
