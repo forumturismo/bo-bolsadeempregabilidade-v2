@@ -394,7 +394,7 @@ class WpUserController extends AbstractController {
         $searchForm = $this->createForm('App\Form\WpUserSearchType', $wpUserSearch, ['method' => 'GET', 'nacionalidades' => $new_nacionalidades]);
         $searchForm->handleRequest($request);
 
-        $query = "SELECT wp_users.id as id, wp_users.user_registered as user_registered, wp_users.user_login as user_login, 
+        $query = "SELECT wp_users.id as id, wp_users.user_registered as user_registered, wp_users.user_login as user_login,  wp_users.user_email as user_email,
                     candidate_names.name as name,
                     resumes.resumes_count as user_resumes_count, resumes_updated.resume_updated , nacionalidades.nacionalidade as nacionalidade
                 FROM wp_users 
@@ -490,10 +490,11 @@ class WpUserController extends AbstractController {
         $activeWorksheet->setCellValue('A1', 'Id');
         $activeWorksheet->setCellValue('B1', 'Data Registo');
         $activeWorksheet->setCellValue('C1', 'User Login');
-        $activeWorksheet->setCellValue('D1', 'Nome');
-        $activeWorksheet->setCellValue('E1', 'Nº Curriculos');
-        $activeWorksheet->setCellValue('F1', 'Ult. Curri.');
-        $activeWorksheet->setCellValue('G1', 'Nacionalidade');
+        $activeWorksheet->setCellValue('D1', 'User Email');
+        $activeWorksheet->setCellValue('E1', 'Nome');
+        $activeWorksheet->setCellValue('F1', 'Nº Curriculos');
+        $activeWorksheet->setCellValue('G1', 'Ult. Curri.');
+        $activeWorksheet->setCellValue('H1', 'Nacionalidade');
 
         $line = 2;
         foreach ($users as $key => $user) {
@@ -501,10 +502,12 @@ class WpUserController extends AbstractController {
             $activeWorksheet->setCellValue('A' . $line, $user['id']);
             $activeWorksheet->setCellValue('B' . $line, $user['user_registered']);
             $activeWorksheet->setCellValue('C' . $line, $user['user_login']);
-            $activeWorksheet->setCellValue('D' . $line, $user['name']);
-            $activeWorksheet->setCellValue('E' . $line, $user['user_resumes_count']);
-            $activeWorksheet->setCellValue('F' . $line, $user['resume_updated']);
-            $activeWorksheet->setCellValue('G' . $line, $user['nacionalidade']);
+            // introduzir aqui o user_email
+            $activeWorksheet->setCellValue('D' . $line, $user['user_email']);
+            $activeWorksheet->setCellValue('E' . $line, $user['name']);
+            $activeWorksheet->setCellValue('F' . $line, $user['user_resumes_count']);
+            $activeWorksheet->setCellValue('G' . $line, $user['resume_updated']);
+            $activeWorksheet->setCellValue('H' . $line, $user['nacionalidade']);
             $line = $line + 1;
         }
 
